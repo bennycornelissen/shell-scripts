@@ -24,7 +24,8 @@ fi
 
 while read repo_dir repo_remote; do
   if [[ ! -d "${GITPATH}/${repo_dir}/.git" ]]; then
-    git clone --recurse-submodules ${repo_remote} ${GITPATH}/${repo_dir}
+    echo "Cloning ${repo_dir}.."
+    git clone --recurse-submodules ${repo_remote} ${GITPATH}/${repo_dir} &>/dev/null
   elif [[ "$(git --git-dir=${GITPATH}/${repo_dir}/.git --work-tree=${GITPATH}/${repo_dir} remote get-url origin)" != "${repo_remote}" ]]; then
     echo "Setting URL for ${repo_dir}.."
     git --git-dir=${GITPATH}/${repo_dir}/.git --work-tree=${GITPATH}/${repo_dir} remote set-url origin ${repo_remote}
