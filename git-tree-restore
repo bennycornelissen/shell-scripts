@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#
+# This script restores your git work tree from a backup file
+set -e
+set -o pipefail
+
+if [[ $# -ne 2 ]]; then
+  echo "USAGE: $0 <backup file location> <git base path>"
+  exit 1
+fi
+
+readonly BACKUP_FILE="${1}"
+readonly GITPATH="${2}"
+
+if [[ ! -f ${BACKUP_FILE} ]]; then
+  echo "ERROR: ${BACKUP_FILE} can't be read. Exiting.."
+  exit 1
+fi
+
+if [[ ! -d ${GITPATH} ]]; then
+  echo "ERROR: ${GITPATH} is not a directory. Exiting.."
+  exit 1
+fi
+
+while read repo_dir repo_remote; do
+  if [[ ! -d "${GITPATH}/${repo_dir}/.git" ]]; then
+    git clone --recurse-submodules ${repo_remote} ${GITPATH}/${repo_dir}
+  elif [[ "$(git --git-dir=${GITPATH}/${repo_dir}/.git --work-tree=${GITPATH}/${repo_dir} remote get-url origin)" != "${repo_remote}" ]]; then
+    echo "Setting URL for ${repo_dir}.."
+    git --git-dir=${GITPATH}/${repo_dir}/.git --work-tree=${GITPATH}/${repo_dir} remote set-url origin ${repo_remote}
+  else
+    echo "Nothing to do for ${repo_dir}"
+  fi
+done < ${BACKUP_FILE}
