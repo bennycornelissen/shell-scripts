@@ -22,7 +22,7 @@ if [[ ! -d ${GITPATH} ]]; then
   exit 1
 fi
 
-while read repo_dir repo_remote; do
+while -r read repo_dir repo_remote; do
   if [[ ! -d "${GITPATH}/${repo_dir}/.git" ]]; then
     echo "Cloning ${repo_dir}.."
     git clone --recurse-submodules ${repo_remote} ${GITPATH}/${repo_dir} &>/dev/null
@@ -32,4 +32,4 @@ while read repo_dir repo_remote; do
   else
     echo "Nothing to do for ${repo_dir}"
   fi
-done < ${BACKUP_FILE}
+done <${BACKUP_FILE}

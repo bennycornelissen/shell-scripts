@@ -19,8 +19,7 @@ readonly GITPATH="${2}"
 
 # Set the max search depth from user input, add one level for .git subdir matching
 max_search_depth_user_arg="${3:-2}"
-readonly MAX_SEARCH_DEPTH=$(( max_search_depth_user_arg += 1 ))
-
+readonly MAX_SEARCH_DEPTH=$((max_search_depth_user_arg += 1))
 
 if [[ ! -d ${GITPATH} ]]; then
   echo "ERROR: ${GITPATH} is not a directory. Exiting.."
@@ -35,7 +34,4 @@ for repo in ${repolist}; do
   repo_dir="${repo#${GITPATH}/}"
   repo_remote="$(git --git-dir=${repo}/.git --work-tree=${repo} remote get-url origin)"
   echo "${repo_dir} ${repo_remote}"
-done > ${BACKUP_FILE}
-
-
-
+done >${BACKUP_FILE}
