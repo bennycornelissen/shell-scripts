@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 
 if [[ $SSH_AUTH_SOCK =~ "/tmp/" ]]; then
   ln -sf $SSH_AUTH_SOCK ${HOME}/.ssh/ssh-auth-sock
