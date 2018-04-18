@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 1 ]; then
+  echo "USAGE: please provide the line number of the key you want to remove"
+else
+  line_nr=$1
+  if [ $(uname) == "Darwin" ]; then
+    sed -i '' "${line_nr}d" ${HOME}/.ssh/known_hosts
+  fi
+
+  if [ $(uname) == "Linux" ]; then
+    sed -i "${line_nr}d" ${HOME}/.ssh/known_hosts
+  fi
+fi

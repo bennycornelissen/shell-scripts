@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+key=${1:?no key provided}
+if [ ! -r ${HOME}/.ssh/${key} ]; then
+  echo "Key not found."
+  return 1
+fi
+
+if ! ssh-add -l | grep ".ssh/${key}"; then
+  ssh-add ${HOME}/.ssh/${key}
+fi
