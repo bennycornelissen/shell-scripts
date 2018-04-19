@@ -2,6 +2,7 @@
 
 c_repos=$(find -L . -maxdepth 2 -name .git -type d -print | cut -d'/' -f2 | sort)
 c_basedir=${PWD}
+export GIT_PAGER="cat"
 
 for repo in ${c_repos}; do
   echo "## [${repo}] "
