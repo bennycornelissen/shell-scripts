@@ -3,7 +3,7 @@
 key=${1:?no key provided}
 if [ ! -r ${HOME}/.ssh/${key} ]; then
   echo "Key not found."
-  return 1
+  exit 1
 fi
 
 if ! ssh-add -l | grep ".ssh/${key}"; then
