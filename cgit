@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-c_repos=$(find -L . -maxdepth 2 -name .git -type d -print | cut -d'/' -f2 | sort)
+c_repos=$(find -L . -maxdepth ${CGIT_DEPTH:-2} -name .git -type d -print | sed -e 's/\.\///g' | sed -e 's/\/.git$//g' | sort)
 c_basedir=${PWD}
 export GIT_PAGER="cat"
 
