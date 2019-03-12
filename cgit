@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+if [[ $# -eq 0 ]]; then
+  echo "
+USAGE: $0 <any git subcommand>
+
+Example: cgit fetch --all
+
+Depth: by default cgit will only look for git repositories that are direct
+subdirectories. This behaviour can be modified by setting the 'CGIT_DEPTH'
+environment variable. The default value is 2 (<current>/*/.git), but can be
+increased if you have a more nested structure."
+  exit 1
+fi
+
 c_repos=$(find -L . -maxdepth ${CGIT_DEPTH:-2} -name .git -type d -print | sed -e 's/\.\///g' | sed -e 's/\/.git$//g' | sort)
 c_basedir=${PWD}
 export GIT_PAGER="cat"

@@ -30,6 +30,8 @@ From .
 Current branch dockerfile-fixes is up to date.
 ```
 
+By default, `cgit` only looks for direct subdirectories that are git repositories. This behaviour can be changed by setting the `CGIT_DEPTH` environment variable. Default value is 2, which means it will look ffor `.git` directories at 2 levels from the current dir (`<current>/*/.git`). By increasing the value for `CGIT_DEPTH` you can use `cgit` on nested structures.
+
 **NOTE**: I also have a ton of tricks in my `.gitconfig` that you may want to check out at this point. You can find them on my [blog](https://blog.bennycornelissen.nl/post/favorite-git-tricks/)
 
 ### git-tree-backup
