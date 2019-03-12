@@ -80,3 +80,13 @@ $ ssh_load_key foobar
 Key not found
 $ ssh_load_key mykey
 ```
+
+### ssl-san-resolver
+The SSL SAN Resolver is mainly a 'landscape inspection tool'. In many cases, a single SSL certificate will be used for many websites (driven by cost). By connecting to a website, reading the cert, and getting the Subject Alternative Name (SAN) records, we can get a list of all the other websites the cert if used for, thus getting some insight in the landscape. This script outputs the SANs and resolves them to an IP address. 
+
+```
+$ ssl-san-resolver github.com
+                              github.com : 140.82.118.3
+                          www.github.com : 141.82.118.4
+```
+
