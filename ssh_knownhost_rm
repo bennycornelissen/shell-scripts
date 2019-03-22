@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+set -o pipefail
 
 if [ $# -ne 1 ]; then
   echo "USAGE: please provide the line number of the key you want to remove"

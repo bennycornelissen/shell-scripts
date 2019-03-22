@@ -24,4 +24,3 @@ for repo in ${c_repos}; do
     "$@"
   echo -e ""
 done
-

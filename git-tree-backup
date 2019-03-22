@@ -27,7 +27,7 @@ if [[ ! -d ${GITPATH} ]]; then
 fi
 
 # Collect top-level git directories
-repolist=$(find ${GITPATH} -maxdepth ${MAX_SEARCH_DEPTH} -type d -name .git | awk -F"/.git" '{print $1}')
+repolist="$(find ${GITPATH} -maxdepth ${MAX_SEARCH_DEPTH} -type d -name .git | awk -F"/.git" '{print $1}')"
 
 # Create the backup
 for repo in ${repolist}; do

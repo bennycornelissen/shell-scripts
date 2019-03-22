@@ -4,8 +4,8 @@ workflow "Shell Pipeline" {
 }
 
 action "shell-fmt" {
-  uses = "docker://vdan/shfmt:v2.6.3"
-  args = "-i 2 -ci ."
+  uses = "docker://mvdan/shfmt:v2.6.3"
+  args = "-i 2 -ci -d ."
 }
 
 workflow "shaking finger action" {
