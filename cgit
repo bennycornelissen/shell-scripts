@@ -22,5 +22,5 @@ for repo in ${c_repos}; do
   git --git-dir="${c_basedir}/${repo}/.git" \
     --work-tree="${c_basedir}/${repo}" \
     "$@"
-  echo -e ""
+   echo -e ""
 done
