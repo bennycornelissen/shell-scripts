@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+#
+# Kuddle is a wrapper for kubectl to use with ephemeral K8s environments.
+# Using a cluster identifier and a Kuddle config file, on each run it will
+# configure a temporary Kubeconfig, and execute the commands you want.
+#
+# Optionally, you can tweak Kuddle by setting environment variables:
+# - KUDDLE_KUBE_COMMAND: by default we run kubectl, but we could run
+#   another command (like Helm) instead. However, please note that
+#   the "--kubeconfig=${kubeconfig} argument will always be added.
+#   Currently confirmed to work with kubectl and helm.
+set -e
+set -o pipefail
+
+
+# This echo funtion will only print something if the script wasn't called
+# from another script. This is useful if you want to suppress output that
+# is used purely for humans
+_echo() {
+  local message="${*}"
+
+  if [[ $KUDDLE_DEBUG -eq 1 ]]; then
+    echo ${message}
+  fi
+}
+
+_usage() {
+  echo "USAGE: $0 <environment> <kubectl args>"
+  echo "Example: $0 ke-acc get pods"
+  echo "Also make sure to have AWS_PROFILE or credential environment variables set,"
+  echo "and to have AWS CLI and Kubectl installed"
+  exit 1
+}
+
+# Arguments
+readonly kube_command="${KUDDLE_KUBE_COMMAND:-kubectl}"
+readonly kubeconfig=${KUBECONFIG?ERROR: KUBECONFIG unset. We will not overwrite the default config file for sanity reasons}
+readonly kube_current_context="$(kubectl config current-context)"
+readonly kube_args="${*}"
+
+
+# Get the relevant server URL from the existing KubeConfig
+readonly kube_server="$(kubectl config view --minify -o jsonpath='{.clusters[?(@.name == "'${kube_current_context}'")].cluster.server}')"
+
+
+_is_eks_cluster() {
+
+  # If the server URL matches *.eks.amazonaws.com we can assume it's EKS
+  if [[ $kube_server =~ (.*).eks.amazonaws.com$ ]]; then
+    _echo "${kube_current_context} is an EKS cluster"
+    return 0
+  else
+    _echo "${kube_current_context} is not an EKS cluster"
+    return 1
+  fi
+}
+
+_config_has_correct_eks_endpoint() {
+
+  local _endpoint="$(aws --region ${aws_region} --profile ${aws_profile} eks describe-cluster --name ${aws_cluster_name} | jq -r '.cluster.endpoint')"
+
+  if [[ "${kube_server}" == "${_endpoint}" ]]; then
+    _echo "${kube_current_context} has correctly configured endpoint"
+    _echo "Config value: ${kube_server}"
+    _echo "AWS value: ${_endpoint}"
+    return 0
+  else
+    _echo "${kube_current_context} has an incorrect endpoint"
+    _echo "Config value: ${kube_server}"
+    _echo "AWS value: ${_endpoint}"
+    return 1
+  fi
+}
+
+_eks_update_config() {
+  _echo "Will update ${KUBECONFIG} now with new config for ${kube_current_context}.."
+
+  if [[ ${aws_profile} == "" ]]; then
+    aws_profile_args=
+  else
+    aws_profile_args="--profile ${aws_profile}"
+  fi
+
+  aws eks update-kubeconfig --name ${aws_cluster_name} --region ${aws_region} --kubeconfig ${KUBECONFIG} ${aws_profile_args} &>/dev/null
+
+  _echo "Updated ${KUBECONFIG}"
+
+}
+
+
+if _is_eks_cluster; then
+
+  readonly aws_region="$(echo ${kube_server} | cut -d'.' -f3)"
+  readonly aws_cluster_name="$(echo ${kube_current_context} | cut -d'/' -f2)"
+  readonly aws_profile="$(kubectl config view --minify -o jsonpath='{.users[?(@.name == "'${kube_current_context}'")].user.exec.env[?(@.name == "AWS_PROFILE")].value}')"
+
+  if ! _config_has_correct_eks_endpoint; then
+    _echo "Config should be updated"
+    _eks_update_config
+  elif [[ ${KUDDLE_FORCE_UPDATE} -eq 1 ]]; then
+    _echo "Force Update triggered. Regenerating config"
+    _eks_update_config
+  else
+    _echo "Config is OK. Nothing to do"
+  fi
+fi
+
+${kube_command} ${kube_args}
