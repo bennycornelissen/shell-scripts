@@ -63,7 +63,7 @@ Setting URL for shell-scripts..
 ```
 
 ### kuddle
-The `kuddle` script acts as a wrapper around `kubectl`, and is meant to make life with ephemeral EKS clusters easier. An ephemeral K8s cluster is a cluster that is destroyed and recreated regularly. Whenever that happens the cluster name will be the same, but the API endpoint (on EKS) will change, which means your Kube config is no longer valid. Kuddle will recognize EKS clusters automatically and will check if the endpoint is valid. If not, it will automatically update your kubeconfig using `aws eks update-kubeconfig ...` using the values from your existing kubeconfig transparently. 
+The `kuddle` script acts as a wrapper around `kubectl`, and is meant to make life with ephemeral EKS clusters easier. An ephemeral K8s cluster is a cluster that is destroyed and recreated regularly. Whenever that happens the cluster name will be the same, but the API endpoint (on EKS) will change, which means your Kube config is no longer valid. Kuddle will recognize EKS clusters automatically and will check if the endpoint is valid. If not, it will automatically update your kubeconfig using `aws eks update-kubeconfig ...` using the values from your existing kubeconfig transparently.
 
 Constraints:
 - kuddle will ignore non-EKS clusters. If you use kuddle in that context, it's just a dumb wrapper for `kubectl`
@@ -73,7 +73,28 @@ Constraints:
 Options:
 - `KUDDLE_KUBE_COMMAND`: environment variable to override the path to `kubectl`. Can also be switched to `helm` or any other tool that can work with `$KUBECONFIG`
 - `KUDDLE_DEBUG`: set this to `1` for more verbose output. By default all output (except from `$kube_command`) is suppressed
-- `KUDDLE_FORCE_UPDATE`: set this to `1` to force kuddle to regenerate the kubeconfig, even if it's not strictly necessary. Useful for testing or resolving weird issues 
+- `KUDDLE_FORCE_UPDATE`: set this to `1` to force kuddle to regenerate the kubeconfig, even if it's not strictly necessary. Useful for testing or resolving weird issues
+
+Example:
+
+```
+### Normally wrapping kubectl
+$ kuddle get pods
+NAME                              READY   STATUS      RESTARTS   AGE
+...
+
+### Debug mode and Force Update mode enabled
+$ $ KUDDLE_DEBUG=1 KUDDLE_FORCE_UPDATE=1 kuddle get pods
+arn:aws:eks:eu-central-1:XXXXXXXXXXXX:cluster/foo is an EKS cluster
+arn:aws:eks:eu-central-1:XXXXXXXXXXXX:cluster/foo has correctly configured endpoint
+Config value: https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.YYY.eu-central-1.eks.amazonaws.com
+AWS value: https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.YYY.eu-central-1.eks.amazonaws.com
+Force Update triggered. Regenerating config
+Will update /Users/benny/.env/config/projectA/kubeconfig/foo now with new config for arn:aws:eks:eu-central-1:XXXXXXXXXXXX:cluster/foo..
+Updated /Users/benny/.env/config/projectA/kubeconfig/foo
+NAME                              READY   STATUS      RESTARTS   AGE
+...
+```
 
 ### link_ssh_agent
 The `link_ssh_agent` script checks if you have an `$SSH_AUTH_SOCK` set, and creates/updates a symlink in a fixed location: `$HOME/.ssh/ssh-auth-sock`. This solves an issue where the SSH agent becomes unusable in a re-attached Tmux session. Read [this blog post](https://blog.bennycornelissen.nl/post/dotfile-magic-terminal-multiplexers-and-ssh-agents/) for a more elaborate explanation on the problem and how `link_ssh_agent` is part of the fix.
@@ -97,7 +118,7 @@ $ ssh_load_key mykey
 ```
 
 ### ssl-san-resolver
-The SSL SAN Resolver is mainly a 'landscape inspection tool'. In many cases, a single SSL certificate will be used for many websites (driven by cost). By connecting to a website, reading the cert, and getting the Subject Alternative Name (SAN) records, we can get a list of all the other websites the cert if used for, thus getting some insight in the landscape. This script outputs the SANs and resolves them to an IP address. 
+The SSL SAN Resolver is mainly a 'landscape inspection tool'. In many cases, a single SSL certificate will be used for many websites (driven by cost). By connecting to a website, reading the cert, and getting the Subject Alternative Name (SAN) records, we can get a list of all the other websites the cert if used for, thus getting some insight in the landscape. This script outputs the SANs and resolves them to an IP address.
 
 ```
 $ ssl-san-resolver github.com
