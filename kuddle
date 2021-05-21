@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 #
 # Kuddle is a wrapper for kubectl to use with ephemeral K8s environments.
-# Using a cluster identifier and a Kuddle config file, on each run it will
-# configure a temporary Kubeconfig, and execute the commands you want.
+# On each run kuddle will check your current context. If it's an EKS cluster
+# it will check whether your local kubeconfig matches AWS reality, and if
+# necessary, it will transparently update your kubeconfig.
 #
 # Optionally, you can tweak Kuddle by setting environment variables:
 # - KUDDLE_KUBE_COMMAND: by default we run kubectl, but we could run
 #   another command (like Helm) instead. However, please note that
 #   the "--kubeconfig=${kubeconfig} argument will always be added.
 #   Currently confirmed to work with kubectl and helm.
+# - KUDDLE_DEBUG: set to '1' for verbose output. By default kuddle
+#   will only show the output of the command it wraps.
+# - KUDDLE_FORCE_UPDATE: set to '1' to force regeneration of the
+#   kubeconfig, even if not strictly necessary. Useful for testing.
 set -e
 set -o pipefail
 
@@ -87,7 +92,13 @@ _eks_update_config() {
 
 }
 
+# Pre flight checks
+[[ $# -lt 1 ]] && _usage
+command -v aws &>/dev/null || _usage
+command -v ${kube_command} &>/dev/null || _usage
+command -v jq &>/dev/null || _usage
 
+# Perform magic for ephemeral EKS clusters
 if _is_eks_cluster; then
 
   readonly aws_region="$(echo ${kube_server} | cut -d'.' -f3)"
@@ -105,4 +116,5 @@ if _is_eks_cluster; then
   fi
 fi
 
+# Finally, run the actual commands we want
 ${kube_command} ${kube_args}
