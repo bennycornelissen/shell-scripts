@@ -30,8 +30,8 @@ _echo() {
 }
 
 _usage() {
-  echo "USAGE: $0 <environment> <kubectl args>"
-  echo "Example: $0 ke-acc get pods"
+  echo "USAGE: $0 <kubectl args>"
+  echo "Example: $0 get pods"
   echo "Also make sure to have AWS_PROFILE or credential environment variables set,"
   echo "and to have AWS CLI and Kubectl installed"
   exit 1
