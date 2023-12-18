@@ -34,6 +34,9 @@ By default, `cgit` only looks for direct subdirectories that are git repositorie
 
 **NOTE**: I also have a ton of tricks in my `.gitconfig` that you may want to check out at this point. You can find them on my [blog](https://blog.bennycornelissen.nl/post/favorite-git-tricks/)
 
+### cgh
+What `cgit` is to git, `cgh` is to the Github CLI.
+
 ### git-tree-backup
 The `git-tree-backup` script is **not** a backup tool for the contents of working copies or git repositories. It is, however, a tool to backup a definition of what your 'git tree' looks like. If your repos are checked out in `$HOME/code` but you use multiple machines, it's practical to have all the same repos checked out on all machines, and have remotes configured in the same way. With `git-tree-backup`, you can create a list of all repos and their remote URLs for a given directory, and write that list to a file. If you write that list to a shared location that you can access from all your systems (cloud storage or network share), you can then use `git-tree-restore` to make sure your `$HOME/code` directory on comp;uter B is identical to computer A.
 
