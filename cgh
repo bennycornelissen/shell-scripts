@@ -12,8 +12,18 @@ fi
 c_repos=$(cgit remote -v | grep github.com | awk -F":| |.git " '{print $2}' | uniq)
 c_basedir=${PWD}
 
-for repo in ${c_repos}; do
-  echo "## [${repo}] "
-  gh --repo ${repo} "$@"
-  echo -e ""
-done
+if [[ "$@" =~ "--json" ]]; then
+
+  for repo in ${c_repos}; do
+    gh --repo ${repo} "$@"
+  done
+
+else
+
+  for repo in ${c_repos}; do
+    echo "## [${repo}] "
+    gh --repo ${repo} "$@"
+    echo -e ""
+  done
+
+fi
