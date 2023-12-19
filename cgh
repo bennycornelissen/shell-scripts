@@ -9,7 +9,7 @@ Example: cgh pr list
   exit 1
 fi
 
-c_repos=$(cgit remote -v | grep github.com | awk -F":| |.git " '{print $2}')
+c_repos=$(cgit remote -v | grep github.com | awk -F":| |.git " '{print $2}' | uniq)
 c_basedir=${PWD}
 
 for repo in ${c_repos}; do
