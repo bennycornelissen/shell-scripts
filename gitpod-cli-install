@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# shellcheck disable=2086
+set -euo pipefail
+
+readonly GITPOD_INSTALL_PATH="${1:-/usr/local/bin}"
+readonly INSTALL_TMPDIR="$(mktemp -d)"
+
+cleanup_on_exit() {
+  if [[ -d ${INSTALL_TMPDIR} ]]; then
+    rm -rf "${INSTALL_TMPDIR}"
+  else
+    echo "${INSTALL_TMPDIR} is not a dir"
+  fi
+}
+
+trap cleanup_on_exit EXIT
+
+if [[ ! -d ${GITPOD_INSTALL_PATH} ]]; then
+  echo "ABORT: Supplied install path is not a directory: ${GITPOD_INSTALL_PATH}"
+  exit 1
+fi
+
+echo "This will install Gitpod CLI into ${GITPOD_INSTALL_PATH}/gitpod"
+echo "Enter your password when prompted for installation commands that require root/sudo permissions.."
+
+sudo -v
+
+echo "Downloading and installing Gitpod CLI..."
+curl -o ${INSTALL_TMPDIR}/gitpod -fsSL "https://releases.gitpod.io/cli/stable/gitpod-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/\(arm64\|aarch64\)/arm64/')" &&
+  chmod +x ${INSTALL_TMPDIR}/gitpod &&
+  sudo mv ${INSTALL_TMPDIR}/gitpod ${GITPOD_INSTALL_PATH}/gitpod
+
+if (xattr ${GITPOD_INSTALL_PATH}/gitpod | grep quarantaine) &>/dev/null; then
+  echo "Removing MacOS quarantaine attribute.."
+  sudo xattr -d com.apple.quarantine ${GITPOD_INSTALL_PATH}/gitpod
+fi
+
+echo "Installation complete. Gitpod version info: "
+${GITPOD_INSTALL_PATH}/gitpod version
